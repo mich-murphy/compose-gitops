@@ -1,0 +1,25 @@
+# Example: add this workflow to the repository that CONTAINS your compose files
+# (not this compose-gitops app). It triggers the compose-gitops webhook on push.
+#
+# In that repo, set secrets:
+#   - COMPOSE_GITOPS_WEBHOOK_SECRET: same value as COMPOSE_GITOPS_WEBHOOK_SECRET on the container
+#   - COMPOSE_GITOPS_URL: base URL of the compose-gitops service (e.g. https://deploy.example.com:8080)
+
+name: Trigger Compose GitOps Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment
+        run: |
+          curl -f -X POST \
+            -H "X-Webhook-Secret: ${{ secrets.COMPOSE_GITOPS_WEBHOOK_SECRET }}" \
+            "${{ secrets.COMPOSE_GITOPS_URL }}/webhook"
+        env:
+          COMPOSE_GITOPS_WEBHOOK_SECRET: ${{ secrets.COMPOSE_GITOPS_WEBHOOK_SECRET }}
+          COMPOSE_GITOPS_URL: ${{ secrets.COMPOSE_GITOPS_URL }}

@@ -1,0 +1,46 @@
+# Nix build outputs (when building with Nix locally)
+result
+result-*
+.nix
+
+# Git and CI (not needed for image build)
+.git
+.gitignore
+.github
+
+# Documentation (not needed in image)
+*.md
+
+# Go build artifacts and coverage (Nix builds from source)
+/compose-gitops
+*.exe
+*.test
+*.out
+vendor/
+coverage.txt
+coverage.html
+
+# direnv (dev only)
+.direnv/
+
+# Environment and secrets (never send to build context)
+.env
+.envrc
+.env.local
+.env.*.local
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# Docker build output directory (Option B in Dockerfile)
+out
+
+# Local image tarballs
+*.tar

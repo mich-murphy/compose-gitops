@@ -1,0 +1,36 @@
+# Go
+/compose-gitops
+*.exe
+*.test
+*.out
+vendor/
+coverage.txt
+coverage.html
+
+# Nix
+result
+result-*
+
+# direnv
+.direnv/
+
+# Environment and secrets
+.env
+.envrc
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# Docker (local load artifact from nix build)
+*.tar
