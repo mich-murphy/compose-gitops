@@ -71,7 +71,7 @@ Compose operations (pull, up, down) use the [Docker Compose Go API](https://gith
 | `COMPOSE_GITOPS_WORK_DIR`        | Yes      | Directory on the host for git clone and compose projects. Must be writable and persistent.                 |
 | `COMPOSE_GITOPS_BRANCH`          | No       | Branch to track (default: `main`).                                                                         |
 | `COMPOSE_GITOPS_POLL_INTERVAL`   | No       | Poll interval, e.g. `5m`. If unset, only webhook/HTTP triggers run sync.                                   |
-| `COMPOSE_GITOPS_WEBHOOK_SECRET`  | No       | If set, webhook and `/sync` requests must include this (header `X-Webhook-Secret` or query `?secret=...`). |
+| `COMPOSE_GITOPS_WEBHOOK_SECRET`  | Yes      | Webhook and `/sync` requests must send this in the `X-Webhook-Secret` header. The server will not start without it. |
 | `COMPOSE_GITOPS_IGNORE_PROJECTS` | No       | Comma-separated project names to never deploy.                                                             |
 | `COMPOSE_GITOPS_PROJECTS`        | No       | Override or append to auto-discovered projects (see `COMPOSE_GITOPS_APPEND_PROJECTS`).                     |
 | `COMPOSE_GITOPS_APPEND_PROJECTS` | No       | If `true` or `1`, `COMPOSE_GITOPS_PROJECTS` is appended to discovered list; otherwise it replaces.         |
