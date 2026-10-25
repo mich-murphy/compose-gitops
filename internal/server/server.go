@@ -103,7 +103,7 @@ func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) verifySecret(r *http.Request) bool {
 	got := r.Header.Get("X-Webhook-Secret")
-	return subtle.ConstantTimeCompare([]byte(got), []byte(s.cfg.WebhookSecret)) == 1
+	return s.cfg.WebhookSecret != "" && subtle.ConstantTimeCompare([]byte(got), []byte(s.cfg.WebhookSecret)) == 1
 }
 
 var syncMu sync.Mutex

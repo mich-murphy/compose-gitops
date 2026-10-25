@@ -73,7 +73,7 @@ func Load() (*Config, error) {
 		WebhookSecret:     webhookSecret,
 		IgnoreProjects:    ignore,
 		ProjectsOverride:  override,
-		AppendProjects:     appendProjects,
+		AppendProjects:    appendProjects,
 		PullProjectImages: pullImages,
 		PruneProjects:     prune,
 		HTTPListenAddr:    listenAddr,

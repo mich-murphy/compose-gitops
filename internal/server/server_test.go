@@ -12,9 +12,9 @@ import (
 // mockRunner is a no-op Runner for tests that do not run real compose operations.
 type mockRunner struct{}
 
-func (mockRunner) Pull(context.Context, string) error  { return nil }
-func (mockRunner) Up(context.Context, string) error     { return nil }
-func (mockRunner) Down(context.Context, string) error   { return nil }
+func (mockRunner) Pull(context.Context, string) error { return nil }
+func (mockRunner) Up(context.Context, string) error   { return nil }
+func (mockRunner) Down(context.Context, string) error { return nil }
 
 func TestHandleHealth(t *testing.T) {
 	cfg := &config.Config{Repository: "x", WorkDir: t.TempDir()}
@@ -70,19 +70,21 @@ func TestHandleWebhook_AcceptsCorrectHeader(t *testing.T) {
 }
 
 func TestVerifySecret(t *testing.T) {
-	srv := New(&config.Config{WebhookSecret: "abc"}, mockRunner{})
 	cases := []struct {
 		name   string
+		secret string
 		target string
 		header string
 		want   bool
 	}{
-		{"correct header", "/sync", "abc", true},
-		{"wrong header", "/sync", "wrong", false},
-		{"no header", "/sync", "", false},
-		{"query param only", "/sync?secret=abc", "", false},
+		{"correct header", "abc", "/sync", "abc", true},
+		{"wrong header", "abc", "/sync", "wrong", false},
+		{"no header", "abc", "/sync", "", false},
+		{"query param only", "abc", "/sync?secret=abc", "", false},
+		{"empty configured secret, no header", "", "/sync", "", false},
 	}
 	for _, c := range cases {
+		srv := New(&config.Config{WebhookSecret: c.secret}, mockRunner{})
 		req := httptest.NewRequest(http.MethodPost, c.target, nil)
 		if c.header != "" {
 			req.Header.Set("X-Webhook-Secret", c.header)
