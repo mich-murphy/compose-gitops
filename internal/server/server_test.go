@@ -41,36 +41,54 @@ func TestHandleSync_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-func TestHandleSync_UnauthorizedWhenSecretSet(t *testing.T) {
+func TestHandleSync_RejectsMissingAndWrongSecret(t *testing.T) {
 	cfg := &config.Config{Repository: "x", WorkDir: t.TempDir(), WebhookSecret: "secret123"}
 	srv := New(cfg, mockRunner{})
-	req := httptest.NewRequest(http.MethodPost, "/sync", nil)
+	for name, header := range map[string]string{"missing": "", "wrong": "nope"} {
+		req := httptest.NewRequest(http.MethodPost, "/sync", nil)
+		if header != "" {
+			req.Header.Set("X-Webhook-Secret", header)
+		}
+		w := httptest.NewRecorder()
+		srv.handleSync(w, req)
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("%s: code: got %d", name, w.Code)
+		}
+	}
+}
+
+func TestHandleWebhook_AcceptsCorrectHeader(t *testing.T) {
+	cfg := &config.Config{Repository: "x", WorkDir: t.TempDir(), WebhookSecret: "secret123"}
+	srv := New(cfg, mockRunner{})
+	req := httptest.NewRequest(http.MethodPost, "/webhook", nil)
+	req.Header.Set("X-Webhook-Secret", "secret123")
 	w := httptest.NewRecorder()
-	srv.handleSync(w, req)
-	if w.Code != http.StatusUnauthorized {
+	srv.handleWebhook(w, req)
+	if w.Code != http.StatusAccepted {
 		t.Errorf("code: got %d", w.Code)
 	}
 }
 
-func TestVerifySecret_EmptyAllowed(t *testing.T) {
-	cfg := &config.Config{}
-	srv := New(cfg, mockRunner{})
-	req := httptest.NewRequest(http.MethodPost, "/sync", nil)
-	if !srv.verifySecret(req) {
-		t.Error("empty secret should allow")
+func TestVerifySecret(t *testing.T) {
+	srv := New(&config.Config{WebhookSecret: "abc"}, mockRunner{})
+	cases := []struct {
+		name   string
+		target string
+		header string
+		want   bool
+	}{
+		{"correct header", "/sync", "abc", true},
+		{"wrong header", "/sync", "wrong", false},
+		{"no header", "/sync", "", false},
+		{"query param only", "/sync?secret=abc", "", false},
 	}
-}
-
-func TestVerifySecret_Header(t *testing.T) {
-	cfg := &config.Config{WebhookSecret: "abc"}
-	srv := New(cfg, mockRunner{})
-	req := httptest.NewRequest(http.MethodPost, "/sync", nil)
-	req.Header.Set("X-Webhook-Secret", "abc")
-	if !srv.verifySecret(req) {
-		t.Error("header secret should match")
-	}
-	req.Header.Set("X-Webhook-Secret", "wrong")
-	if srv.verifySecret(req) {
-		t.Error("wrong secret should not match")
+	for _, c := range cases {
+		req := httptest.NewRequest(http.MethodPost, c.target, nil)
+		if c.header != "" {
+			req.Header.Set("X-Webhook-Secret", c.header)
+		}
+		if got := srv.verifySecret(req); got != c.want {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
 	}
 }
