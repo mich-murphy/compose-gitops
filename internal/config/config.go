@@ -18,7 +18,7 @@ type Config struct {
 	WorkDir string
 	// PollInterval is the interval for polling when enabled (e.g. "5m"). Zero disables polling.
 	PollInterval time.Duration
-	// WebhookSecret is optional; if set, webhook requests must include this secret (e.g. in header or query).
+	// WebhookSecret is required; /webhook and /sync requests must send it in the X-Webhook-Secret header.
 	WebhookSecret string
 	// IgnoreProjects is a list of project names to never deploy.
 	IgnoreProjects []string
@@ -61,6 +61,9 @@ func Load() (*Config, error) {
 	prune := getEnv("COMPOSE_GITOPS_PRUNE_PROJECTS", "false") == "true" || getEnv("COMPOSE_GITOPS_PRUNE_PROJECTS", "false") == "1"
 	listenAddr := getEnv("COMPOSE_GITOPS_HTTP_ADDR", ":8080")
 	webhookSecret := os.Getenv("COMPOSE_GITOPS_WEBHOOK_SECRET")
+	if webhookSecret == "" {
+		return nil, fmt.Errorf("COMPOSE_GITOPS_WEBHOOK_SECRET is required")
+	}
 
 	return &Config{
 		Repository:        repo,
@@ -70,7 +73,7 @@ func Load() (*Config, error) {
 		WebhookSecret:     webhookSecret,
 		IgnoreProjects:    ignore,
 		ProjectsOverride:  override,
-		AppendProjects:     appendProjects,
+		AppendProjects:    appendProjects,
 		PullProjectImages: pullImages,
 		PruneProjects:     prune,
 		HTTPListenAddr:    listenAddr,

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -101,17 +102,8 @@ func (s *Server) handleWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) verifySecret(r *http.Request) bool {
-	if s.cfg.WebhookSecret == "" {
-		return true
-	}
-	// Check header (e.g. X-Webhook-Secret or Authorization: Bearer <secret>)
-	if h := r.Header.Get("X-Webhook-Secret"); h == s.cfg.WebhookSecret {
-		return true
-	}
-	if q := r.URL.Query().Get("secret"); q == s.cfg.WebhookSecret {
-		return true
-	}
-	return false
+	got := r.Header.Get("X-Webhook-Secret")
+	return s.cfg.WebhookSecret != "" && subtle.ConstantTimeCompare([]byte(got), []byte(s.cfg.WebhookSecret)) == 1
 }
 
 var syncMu sync.Mutex

@@ -31,10 +31,28 @@ func TestLoad_WorkDirRequired(t *testing.T) {
 	}
 }
 
+func TestLoad_WebhookSecretRequired(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("COMPOSE_GITOPS_REPOSITORY", "https://github.com/foo/bar")
+	os.Setenv("COMPOSE_GITOPS_WORK_DIR", "/tmp/work")
+	if _, err := Load(); err == nil {
+		t.Fatal("expected error when webhook secret missing")
+	}
+	os.Setenv("COMPOSE_GITOPS_WEBHOOK_SECRET", "s3cret")
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.WebhookSecret != "s3cret" {
+		t.Errorf("secret: got %q", cfg.WebhookSecret)
+	}
+}
+
 func TestLoad_Defaults(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("COMPOSE_GITOPS_REPOSITORY", "https://github.com/foo/bar")
 	os.Setenv("COMPOSE_GITOPS_WORK_DIR", "/tmp/work")
+	os.Setenv("COMPOSE_GITOPS_WEBHOOK_SECRET", "s3cret")
 	cfg, err := Load()
 	if err != nil {
 		t.Fatal(err)
@@ -54,6 +72,7 @@ func TestLoad_IgnoreProjects(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("COMPOSE_GITOPS_REPOSITORY", "https://github.com/foo/bar")
 	os.Setenv("COMPOSE_GITOPS_WORK_DIR", "/tmp/work")
+	os.Setenv("COMPOSE_GITOPS_WEBHOOK_SECRET", "s3cret")
 	os.Setenv("COMPOSE_GITOPS_IGNORE_PROJECTS", "a, b , c")
 	cfg, err := Load()
 	if err != nil {
