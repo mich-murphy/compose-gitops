@@ -37,7 +37,7 @@
     devShells = forAllSystems ({pkgs}: {
       default = pkgs.mkShell {
         packages = [
-          pkgs.go_1_25
+          pkgs.go_1_26
           pkgs.gopls
           pkgs.delve
           pkgs.docker
@@ -65,7 +65,7 @@
         version = "0.1.0";
         src = ./.;
         subPackages = [ "cmd/compose-gitops" ];
-        vendorHash = "sha256-uPOsKFePJazbPj1ZDjYV+ZWGHu8CyDkHgOPOv2Yus1U=";
+        vendorHash = "sha256-SQEmlwrZi5kODb/LKzKQ9mKykDZ7nHIM3KsrJqOPkYM=";
         env.CGO_ENABLED = "0";
         ldflags = [ "-s" "-w" ];
       };
