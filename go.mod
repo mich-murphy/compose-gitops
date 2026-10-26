@@ -1,6 +1,6 @@
 module github.com/michael/dev/compose-gitops
 
-go 1.26.8
+go 1.26.10
 
 require (
 	github.com/compose-spec/compose-go/v2 v2.16.1
